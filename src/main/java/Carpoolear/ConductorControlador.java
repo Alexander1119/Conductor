@@ -21,15 +21,15 @@ public class ConductorControlador {
     private final ConductorRepositorio repositorio;
     private final ConductorEnsambladorRecursos ensamblador;
 
-    ConductorControlador(ConductorRepositorio repositorio, ConductorEnsambladorRecursos ensamblador){
-        this.repositorio=repositorio;
-        this.ensamblador=ensamblador;
+    ConductorControlador(ConductorRepositorio repositorio, ConductorEnsambladorRecursos ensamblador) {
+        this.repositorio = repositorio;
+        this.ensamblador = ensamblador;
 
     }
 
     //Agregando raiz
     @GetMapping("/conductor")
-    Resources<Resource<Conductor>> todo(){
+    Resources<Resource<Conductor>> todo() {
 
         List<Resource<Conductor>> conductores = repositorio.findAll().stream()
                 .map(ensamblador::toResource)
@@ -40,7 +40,7 @@ public class ConductorControlador {
     }
 
     @PostMapping("/conductor")
-    ResponseEntity<?> nuevoConductor(@RequestBody Conductor nuevoConductor) throws URISyntaxException{
+    ResponseEntity<?> nuevoConductor(@RequestBody Conductor nuevoConductor) throws URISyntaxException {
         Resource<Conductor> recurso = ensamblador.toResource(repositorio.save(nuevoConductor));
 
         return ResponseEntity
@@ -51,15 +51,15 @@ public class ConductorControlador {
 
     //un solo item
     @GetMapping("/conductor/{id}")
-    Resource<Conductor> uno(@PathVariable Long id){
+    Resource<Conductor> uno(@PathVariable Long id) {
 
-        Conductor conductor=repositorio.findById(id)
-                .orElseThrow(() ->new ConductorExcepciónNoEncontrada(id));
+        Conductor conductor = repositorio.findById(id)
+                .orElseThrow(() -> new ConductorExcepciónNoEncontrada(id));
         return ensamblador.toResource(conductor);
     }
 
     @PutMapping("/conductor/{id}")
-    ResponseEntity<?> reemplazarConductor(@RequestBody Conductor nuevoConductor,@PathVariable Long id) throws URISyntaxException{
+    ResponseEntity<?> reemplazarConductor(@RequestBody Conductor nuevoConductor, @PathVariable Long id) throws URISyntaxException {
 
         Conductor actualizarConductor = repositorio.findById(id)
                 .map(conductor -> {
@@ -67,9 +67,9 @@ public class ConductorControlador {
                     conductor.setNumeroLiensia(nuevoConductor.getNumeroLiensia());
                     return repositorio.save(conductor);
                 })
-                .orElseGet(() ->{
-                   nuevoConductor.setId(id);
-                   return repositorio.save(nuevoConductor);
+                .orElseGet(() -> {
+                    nuevoConductor.setId(id);
+                    return repositorio.save(nuevoConductor);
                 });
 
         Resource<Conductor> recurso = ensamblador.toResource(actualizarConductor);
@@ -81,7 +81,9 @@ public class ConductorControlador {
     }
 
     @DeleteMapping("/conductor/{id}")
-            void BorrarConductor(@PathVariable Long id){
-                repositorio.deleteById(id);
-            }
+    ResponseEntity<?> borrarConductor(@PathVariable Long id) {
+        repositorio.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

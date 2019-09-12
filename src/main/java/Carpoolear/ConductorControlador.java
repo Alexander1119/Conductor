@@ -16,9 +16,12 @@ public class ConductorControlador {
 
 
     private final ConductorRepositorio repositorio;
+    private final ConductorEnsambladorRecursos ensamblador;
 
-    ConductorControlador(ConductorRepositorio repositorio){
+    ConductorControlador(ConductorRepositorio repositorio, ConductorEnsambladorRecursos ensamblador){
         this.repositorio=repositorio;
+        this.ensamblador=ensamblador;
+
     }
 
     //Agregando raiz
@@ -26,9 +29,7 @@ public class ConductorControlador {
     Resources<Resource<Conductor>> todo(){
 
         List<Resource<Conductor>> conductores = repositorio.findAll().stream()
-                .map(conductor -> new Resource<>(conductor,
-                        linkTo(methodOn(ConductorControlador.class).uno(conductor.getId())).withSelfRel(),
-                        linkTo(methodOn(ConductorControlador.class).todo()).withRel("conductor")))
+                .map(ensamblador::toResource)
                 .collect(Collectors.toList());
 
         return new Resources<>(conductores,
@@ -46,10 +47,7 @@ public class ConductorControlador {
 
         Conductor conductor=repositorio.findById(id)
                 .orElseThrow(() ->new ConductorExcepciónNoEncontrada(id));
-        return new Resource<>(conductor,
-                linkTo(methodOn(ConductorControlador.class).uno(id)).withSelfRel(),
-                linkTo(methodOn(ConductorControlador.class).todo()).withRel("conductor")
-        );
+        return ensamblador.toResource(conductor);
     }
 
     @PutMapping("/conductor/{id}")

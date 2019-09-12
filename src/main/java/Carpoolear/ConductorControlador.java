@@ -1,7 +1,6 @@
 package Carpoolear;
 
 
-import org.apache.tomcat.util.file.ConfigurationSource;
 import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,12 +12,12 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 @RestController
-public class ControladorConductor {
+public class ConductorControlador {
 
 
     private final ConductorRepositorio repositorio;
 
-    ControladorConductor(ConductorRepositorio repositorio){
+    ConductorControlador(ConductorRepositorio repositorio){
         this.repositorio=repositorio;
     }
 
@@ -28,12 +27,12 @@ public class ControladorConductor {
 
         List<Resource<Conductor>> conductores = repositorio.findAll().stream()
                 .map(conductor -> new Resource<>(conductor,
-                        linkTo(methodOn(ControladorConductor.class).uno(conductor.getId())).withSelfRel(),
-                        linkTo(methodOn(ControladorConductor.class).todo()).withRel("conductor")))
+                        linkTo(methodOn(ConductorControlador.class).uno(conductor.getId())).withSelfRel(),
+                        linkTo(methodOn(ConductorControlador.class).todo()).withRel("conductor")))
                 .collect(Collectors.toList());
 
         return new Resources<>(conductores,
-                linkTo(methodOn(ControladorConductor.class).todo()).withSelfRel());
+                linkTo(methodOn(ConductorControlador.class).todo()).withSelfRel());
     }
 
     @PostMapping("/conductor")
@@ -48,8 +47,8 @@ public class ControladorConductor {
         Conductor conductor=repositorio.findById(id)
                 .orElseThrow(() ->new ConductorExcepciónNoEncontrada(id));
         return new Resource<>(conductor,
-                linkTo(methodOn(ControladorConductor.class).uno(id)).withSelfRel(),
-                linkTo(methodOn(ControladorConductor.class).todo()).withRel("conductor")
+                linkTo(methodOn(ConductorControlador.class).uno(id)).withSelfRel(),
+                linkTo(methodOn(ConductorControlador.class).todo()).withRel("conductor")
         );
     }
 

@@ -2,8 +2,11 @@ package Carpoolear;
 
 
 import org.springframework.hateoas.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,9 +40,14 @@ public class ConductorControlador {
     }
 
     @PostMapping("/conductor")
-    Conductor nnuevoConductor(@RequestBody Conductor nuevoConductor){
-        return repositorio.save(nuevoConductor);
+    ResponseEntity<?> nuevoConductor(@RequestBody Conductor nuevoConductor) throws URISyntaxException{
+        Resource<Conductor> recurso = ensamblador.toResource(repositorio.save(nuevoConductor));
+
+        return ResponseEntity
+                .created(new URI(recurso.getId().expand().getHref()))
+                .body(recurso);
     }
+
 
     //un solo item
     @GetMapping("/conductor/{id}")
@@ -51,17 +59,25 @@ public class ConductorControlador {
     }
 
     @PutMapping("/conductor/{id}")
-    Conductor reemplazarConductor(@RequestBody Conductor nuevoConductor,@PathVariable Long id){
-        return repositorio.findById(id)
-                .map(conductor ->{
-                    conductor.setName(nuevoConductor.getName());
-                    conductor.setName(nuevoConductor.getName());
+    ResponseEntity<?> reemplazarConductor(@RequestBody Conductor nuevoConductor,@PathVariable Long id) throws URISyntaxException{
+
+        Conductor actualizarConductor = repositorio.findById(id)
+                .map(conductor -> {
+                    conductor.setNombre(nuevoConductor.getNombre());
+                    conductor.setNumeroLiensia(nuevoConductor.getNumeroLiensia());
                     return repositorio.save(conductor);
                 })
                 .orElseGet(() ->{
-                    nuevoConductor.setId(id);
-                    return repositorio.save(nuevoConductor);
+                   nuevoConductor.setId(id);
+                   return repositorio.save(nuevoConductor);
                 });
+
+        Resource<Conductor> recurso = ensamblador.toResource(actualizarConductor);
+
+        return ResponseEntity
+                .created(new URI(recurso.getId().expand().getHref()))
+                .body(recurso);
+
     }
 
     @DeleteMapping("/conductor/{id}")

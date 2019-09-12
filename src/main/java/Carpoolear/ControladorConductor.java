@@ -1,9 +1,16 @@
 package Carpoolear;
 
 
+import org.apache.tomcat.util.file.ConfigurationSource;
+import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.hateoas.Resources;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 @RestController
 public class ControladorConductor {
@@ -17,8 +24,16 @@ public class ControladorConductor {
 
     //Agregando raiz
     @GetMapping("/conductor")
-    List<Conductor> Todo(){
-        return repositorio.findAll();
+    Resources<Resource<Conductor>> todo(){
+
+        List<Resource<Conductor>> conductores = repositorio.findAll().stream()
+                .map(conductor -> new Resource<>(conductor,
+                        linkTo(methodOn(ControladorConductor.class).uno(conductor.getId())).withSelfRel(),
+                        linkTo(methodOn(ControladorConductor.class).todo()).withRel("conductor")))
+                .collect(Collectors.toList());
+
+        return new Resources<>(conductores,
+                linkTo(methodOn(ControladorConductor.class).todo()).withSelfRel());
     }
 
     @PostMapping("/conductor")
@@ -28,9 +43,14 @@ public class ControladorConductor {
 
     //un solo item
     @GetMapping("/conductor/{id}")
-    Conductor uno(@PathVariable Long id){
-        return repositorio.findById(id)
-                .orElseThrow(() -> new ConductorExcepciónNoEncontrada(id));
+    Resource<Conductor> uno(@PathVariable Long id){
+
+        Conductor conductor=repositorio.findById(id)
+                .orElseThrow(() ->new ConductorExcepciónNoEncontrada(id));
+        return new Resource<>(conductor,
+                linkTo(methodOn(ControladorConductor.class).uno(id)).withSelfRel(),
+                linkTo(methodOn(ControladorConductor.class).todo()).withRel("conductor")
+        );
     }
 
     @PutMapping("/conductor/{id}")
